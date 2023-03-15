@@ -8,6 +8,8 @@ spec:
     namespace: wevans
     server: "{{ .Values.spec.destination.server }}"
   syncPolicy:
+    automated:
+      selfHeal: true
     syncOptions:
       - CreateNamespace=true
       - RespectIgnoreDifferences=true
@@ -30,9 +32,9 @@ spec:
         - name: ingress.className
           value: nginx
         - name: ingress.hosts[0].host
-          value: rails.{{ .Values.spec.cluster.baseDomain }}
+          value: blog.{{ .Values.spec.cluster.baseDomain }}
         - name: ingress.tls[0].hosts[0]
-          value: rails.{{ .Values.spec.cluster.baseDomain }}
+          value: blog.{{ .Values.spec.cluster.baseDomain }}
         - name: ingress.tls[0].secretName
           value: blog-tls
         - name: ingress.issuer
