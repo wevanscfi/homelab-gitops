@@ -24,7 +24,7 @@ spec:
     helm:
       parameters:
         - name: image.tag
-          value: "3d19f7aca071d0ccd7c14d533d7b3342f16e3f65"
+          value: "c61efc0e7a674944af52deea8f05075cdfa659f6"
         - name: ingress.enabled
           value: 'true'
         - name: ingress.className
