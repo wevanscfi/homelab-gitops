@@ -1,0 +1,62 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: qa-procare-excercise
+spec:
+  generators:
+  - pullRequest:
+      github:
+        owner: wevanscfi
+        repo: procare-excercise
+        labels:
+          - qa
+        tokenRef:
+          secretName: wevans-github-token
+          key: TOKEN
+      requeueAfterSeconds: 60
+  template:
+    metadata:
+      name: '{{`procare-excercise-{{branch_slug}}`}}'
+      namespace: argocd
+    spec:
+      destination:
+        namespace: wevans
+        server: '{{ .Values.spec.destination.server }}'
+      syncPolicy:
+        automated:
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
+          - RespectIgnoreDifferences=true
+      project: wevans
+      ignoreDifferences:
+        - group: ""
+          kind: Secret
+          name: '{{`procare-excercise-{{branch_slug}}-postgresql`}}'
+          jsonPointers:
+            - /data/postgres-password
+      source:
+        path: charts
+        repoURL: https://github.com/wevanscfi/procare-excercise.git
+        targetRevision: '{{`{{head_sha}}`}}'
+        helm:
+          releaseName: '{{`procare-excercise-{{branch_slug}}`}}'
+          parameters:
+            - name: image.tag
+              value: '{{`{{head_sha}}`}}'
+            - name: ingress.enabled
+              value: 'true'
+            - name: ingress.className
+              value: nginx
+            - name: ingress.hosts[0].host
+              value: 'procare-excercise-{{`{{branch_slug}}`}}.{{ .Values.spec.cluster.baseDomain }}'
+            - name: ingress.tls[0].hosts[0]
+              value: 'procare-excercise-{{`{{branch_slug}}`}}.{{ .Values.spec.cluster.baseDomain }}'
+            - name: ingress.tls[0].secretName
+              value: '{{`procare-excercise-{{branch_slug}}-tls`}}'
+            - name: ingress.issuer
+              value: letsencrypt
+            - name: appEnv.base_host
+              value: 'procare-excercise-{{`{{branch_slug}}`}}.gke.wevans.io'
+          valueFiles:
+            - values.yaml
