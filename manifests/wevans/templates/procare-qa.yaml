@@ -1,13 +1,13 @@
 apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
 metadata:
-  name: qa-procare-excercise
+  name: qa-procare-exercise
 spec:
   generators:
   - pullRequest:
       github:
         owner: wevanscfi
-        repo: procare-excercise
+        repo: procare-exercise
         labels:
           - qa
         tokenRef:
@@ -16,7 +16,7 @@ spec:
       requeueAfterSeconds: 60
   template:
     metadata:
-      name: '{{`procare-excercise-{{branch_slug}}`}}'
+      name: '{{`procare-exercise-{{branch_slug}}`}}'
       namespace: argocd
     spec:
       destination:
@@ -32,15 +32,15 @@ spec:
       ignoreDifferences:
         - group: ""
           kind: Secret
-          name: '{{`procare-excercise-{{branch_slug}}-postgresql`}}'
+          name: '{{`procare-exercise-{{branch_slug}}-postgresql`}}'
           jsonPointers:
             - /data/postgres-password
       source:
         path: charts
-        repoURL: https://github.com/wevanscfi/procare-excercise.git
+        repoURL: https://github.com/wevanscfi/procare-exercise.git
         targetRevision: '{{`{{head_sha}}`}}'
         helm:
-          releaseName: '{{`procare-excercise-{{branch_slug}}`}}'
+          releaseName: '{{`procare-exercise-{{branch_slug}}`}}'
           parameters:
             - name: image.tag
               value: '{{`{{head_sha}}`}}'
@@ -49,14 +49,14 @@ spec:
             - name: ingress.className
               value: nginx
             - name: ingress.hosts[0].host
-              value: 'procare-excercise-{{`{{branch_slug}}`}}.{{ .Values.spec.cluster.baseDomain }}'
+              value: 'procare-exercise-{{`{{branch_slug}}`}}.{{ .Values.spec.cluster.baseDomain }}'
             - name: ingress.tls[0].hosts[0]
-              value: 'procare-excercise-{{`{{branch_slug}}`}}.{{ .Values.spec.cluster.baseDomain }}'
+              value: 'procare-exercise-{{`{{branch_slug}}`}}.{{ .Values.spec.cluster.baseDomain }}'
             - name: ingress.tls[0].secretName
-              value: '{{`procare-excercise-{{branch_slug}}-tls`}}'
+              value: '{{`procare-exercise-{{branch_slug}}-tls`}}'
             - name: ingress.issuer
               value: letsencrypt
             - name: appEnv.base_host
-              value: 'procare-excercise-{{`{{branch_slug}}`}}.gke.wevans.io'
+              value: 'procare-exercise-{{`{{branch_slug}}`}}.gke.wevans.io'
           valueFiles:
             - values.yaml
